@@ -1,4 +1,4 @@
-# StrucTable
+# StructTable
 
 Representing data to the user (i.e. in CLI or TUI) usually requires converting
 data into vector of vector of strings with the data. Further this data is being

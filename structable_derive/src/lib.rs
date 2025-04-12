@@ -13,45 +13,45 @@
 // SPDX-License-Identifier: Apache-2.0
 
 //! Most likely you do not want to use this crate directly. It is a helper for the OpenStack
-//! 
+//!
 //! This crate implements derive macros for converting structures
 //! (or structure vectors) as tables (vector of vector of strings -
 //! as rows and columns).
-//! 
+//!
 //! ```rust
 //! # use std::collections::BTreeSet;
 //! # use serde_json::Value;
 //! # use serde::Serialize;
 //! # use structable_derive::StructTable;
-//! # 
+//! #
 //! # pub trait StructTable {
 //! #     fn headers<O: StructTableOptions>(config: &O) -> Vec<String>;
 //! #     fn data<O: StructTableOptions>(&self, config: &O) -> Vec<Option<String>>;
 //! #     fn status(&self) -> Option<String>;
 //! # }
-//! # 
+//! #
 //! # #[derive(Clone, Debug, Default)]
 //! # pub struct OutputConfig {
 //! #     pub fields: BTreeSet<String>,
 //! #     pub wide: bool,
 //! #     pub pretty: bool,
 //! # }
-//! # 
+//! #
 //! # pub trait StructTableOptions {
 //! #     fn wide_mode(&self) -> bool;
 //! #     fn pretty_mode(&self) -> bool;
 //! #     fn should_return_field<S: AsRef<str>>(&self, field: S, is_wide_field: bool) -> bool;
 //! # }
-//! # 
+//! #
 //! # impl StructTableOptions for OutputConfig {
 //! #     fn wide_mode(&self) -> bool {
 //! #         self.wide
 //! #     }
-//! # 
+//! #
 //! #     fn pretty_mode(&self) -> bool {
 //! #         self.pretty
 //! #     }
-//! # 
+//! #
 //! #     fn should_return_field<S: AsRef<str>>(&self, field: S, is_wide_field: bool) -> bool {
 //! #         if !is_wide_field {
 //! #             self.fields.is_empty() || self.fields.contains(field.as_ref())
@@ -60,7 +60,7 @@
 //! #         }
 //! #     }
 //! # }
-//! # 
+//! #
 //! #[derive(Serialize, StructTable)]
 //! struct User {
 //!     #[structable(title = "ID")]
