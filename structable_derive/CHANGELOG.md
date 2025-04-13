@@ -6,6 +6,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.2.0](https://github.com/gtema/structable/compare/structable_derive-v0.1.6...structable_derive-v0.2.0) - 2025-04-13
+
+### Added
+
+- Split structable into separate repository
+
+### Other
+
+- Fix linter issues
+
 ## [0.1.6](https://github.com/gtema/openstack/compare/structable_derive-v0.1.5...structable_derive-v0.1.6) - 2025-03-29
 
 ### Added

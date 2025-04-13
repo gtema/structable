@@ -1,6 +1,6 @@
 [package]
 name = "structable"
-version = "0.1.0"
+version = "0.2.0"
 license.workspace = true
 edition.workspace = true
 authors.workspace = true
@@ -11,7 +11,7 @@ repository.workspace = true
 [dependencies]
 serde.workspace = true
 
-structable_derive = { version = "^0.1", path = "../structable_derive" }
+structable_derive = { version = "^0.2", path = "../structable_derive" }
 
 [dev-dependencies]
 serde_json.workspace = true
