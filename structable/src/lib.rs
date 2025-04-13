@@ -124,8 +124,17 @@
 //!     }
 //! }
 //! ```
+//!  ## Field parameters
 //!
-//! Example
+//!  - `title` column name to be returned. When unset field name is used.
+//!
+//!  - `wide` return field only in the `wide` mode, or when explicitly requested through `fields`
+//!
+//!  - `serialize` serialize field value to the json. When `pretty` mode is requested uses
+//!  `to_pretty_string()`
+//!
+//!
+//! ## Example
 //!
 //! ```rust
 //! # use std::collections::BTreeSet;
@@ -188,9 +197,6 @@
 //! multiple user ["id", "first_name", "last_name", "long_only"] => [["1", "Scooby", "Doo", "Foo"], ["2", "John", "Cena", "Bar"]]
 //! ```
 //!
-//!
-//!
-
 use serde::{Deserialize, Serialize};
 use std::collections::BTreeSet;
 

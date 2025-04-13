@@ -6,10 +6,10 @@ git_release_enable = false
 [[package]]
 name = "structable"
 git_release_enable = true
+changelog_include = ["structable_derive"]
 version_group = "structable"
 
 [[package]]
 name = "structable_derive"
-changelog_include = ["structable"]
 git_release_enable = true
 version_group = "structable"
