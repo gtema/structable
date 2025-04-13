@@ -11,7 +11,6 @@ repository.workspace = true
 
 [dependencies]
 serde.workspace = true
-
 structable_derive = { version = "^0.2", path = "../structable_derive" }
 
 [dev-dependencies]

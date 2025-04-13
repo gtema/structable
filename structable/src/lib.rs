@@ -202,10 +202,13 @@ pub use structable_derive::StructTable;
 #[derive(Clone, Debug, Default, Deserialize, Serialize)]
 pub struct OutputConfig {
     /// Limit fields (their titles) to be returned
+    #[serde(default)]
     pub fields: BTreeSet<String>,
     /// Wide mode (additional fields requested)
+    #[serde(default)]
     pub wide: bool,
     /// Pretty-print
+    #[serde(default)]
     pub pretty: bool,
 }
 
@@ -234,9 +237,17 @@ impl StructTableOptions for OutputConfig {
 
     fn should_return_field<S: AsRef<str>>(&self, field: S, is_wide_field: bool) -> bool {
         if !is_wide_field {
-            self.fields.is_empty() || self.fields.contains(field.as_ref())
+            self.fields.is_empty()
+                || self
+                    .fields
+                    .iter()
+                    .any(|x| x.to_lowercase() == field.as_ref().to_lowercase())
         } else {
-            (self.fields.is_empty() && self.wide_mode()) || self.fields.contains(field.as_ref())
+            (self.fields.is_empty() && self.wide_mode())
+                || self
+                    .fields
+                    .iter()
+                    .any(|x| x.to_lowercase() == field.as_ref().to_lowercase())
         }
     }
 }
@@ -720,5 +731,19 @@ mod tests {
                 vec![vec!["ID".into(), "1".into()],]
             )
         );
+    }
+
+    #[test]
+    fn test_output_config() {
+        let config = OutputConfig {
+            fields: BTreeSet::from(["Foo".into(), "bAr".into(), "BAZ".into(), "a:b-c".into()]),
+            ..Default::default()
+        };
+
+        assert!(config.should_return_field("Foo", false));
+        assert!(config.should_return_field("FOO", false));
+        assert!(config.should_return_field("bar", false));
+        assert!(config.should_return_field("baz", false));
+        assert!(config.should_return_field("a:b-c", false));
     }
 }
