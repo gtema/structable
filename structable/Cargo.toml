@@ -1,7 +1,10 @@
 [package]
 name = "structable"
-description = "Build table data for structs"
+description = "A crate for 'serializing' structs as Vec<Vec<String>> tables"
 version = "0.2.1"
+readme = "README.md"
+categories.workspace = true
+keywords.workspace = true
 license.workspace = true
 edition.workspace = true
 authors.workspace = true
@@ -10,10 +13,11 @@ homepage.workspace = true
 repository.workspace = true
 
 [dependencies]
-serde.workspace = true
 structable_derive = { version = "^0.2", path = "../structable_derive" }
+serde.workspace = true
 
 [dev-dependencies]
+serde.workspace = true
 serde_json.workspace = true
 
 [[example]]

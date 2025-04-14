@@ -2,11 +2,10 @@
 name = "structable_derive"
 version = "0.2.1"
 authors = ["Artem Goncharov (gtema)"]
-description = "A crate for 'serializing' structs as Vec<Vec<String>> tables"
-categories = ["command-line-interface"]
-keywords = ["table", "cli", "format"]
+description = "Derive macros for the StructTable trait (structable crate)"
+categories.workspace = true
+keywords.workspace = true
 readme = "README.md"
-include = ["Cargo.toml", "src/**/*.rs", "README.md"]
 rust-version.workspace = true
 edition.workspace = true
 license.workspace = true
@@ -23,5 +22,5 @@ quote = "^1.0"
 proc-macro = true
 
 [dev-dependencies]
-serde_json = { workspace = true }
-serde = { workspace = true }
+serde.workspace = true
+serde_json.workspace = true
