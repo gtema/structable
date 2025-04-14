@@ -1,3 +1,17 @@
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+//
+// SPDX-License-Identifier: Apache-2.0
+
 use darling::{ast, FromDeriveInput, FromField};
 use proc_macro2::TokenStream;
 use quote::{quote, ToTokens};
@@ -6,8 +20,6 @@ use quote::{quote, ToTokens};
 /// composable; each darling-dependent crate should have its own struct to handle
 /// when its trait is derived.
 #[derive(Debug, FromDeriveInput)]
-// This line says that we want to process all attributes declared with `my_trait`,
-// and that darling should panic if this receiver is given an enum.
 #[darling(attributes(structable), supports(struct_any))]
 pub(crate) struct TableStructInputReceiver {
     /// The struct ident.
@@ -24,13 +36,12 @@ pub(crate) struct TableStructInputReceiver {
 
 #[derive(Debug, FromField)]
 #[darling(attributes(structable))]
-pub(crate) struct TableStructFieldReceiver {
+struct TableStructFieldReceiver {
     /// Get the ident of the field. For fields in tuple or newtype structs or
     /// enum bodies, this can be `None`.
     ident: Option<syn::Ident>,
 
-    // /// This magic field name pulls the type from the input.
-    // ty: syn::Type,
+    /// Optional alternative title for the field
     title: Option<String>,
 
     /// Whether option is returned in wide mode only
@@ -41,7 +52,7 @@ pub(crate) struct TableStructFieldReceiver {
     #[darling(default)]
     optional: bool,
 
-    /// apply `to_string_pretty` instead of `to_string` for the value
+    /// Apply `to_string_pretty` instead of `to_string` for the value
     #[darling(default)]
     pretty: bool,
 
@@ -49,7 +60,7 @@ pub(crate) struct TableStructFieldReceiver {
     #[darling(default)]
     serialize: bool,
 
-    /// `status` field
+    /// Whether this is a `status` field
     #[darling(default)]
     status: bool,
 }
@@ -235,6 +246,45 @@ mod tests {
                 foo: Value,
                 #[structable(optional, pretty)]
                 bar: Option<Value>,
+            }
+        };
+        let input = syn::parse2(input).unwrap();
+        TableStructInputReceiver::from_derive_input(&input).unwrap();
+    }
+
+    #[test]
+    fn test_parse_wide() {
+        let input = quote! {
+            #[derive(StructTable)]
+            struct FooSpec {
+                #[structable(wide)]
+                foo: Value,
+            }
+        };
+        let input = syn::parse2(input).unwrap();
+        TableStructInputReceiver::from_derive_input(&input).unwrap();
+    }
+
+    #[test]
+    fn test_parse_serialize() {
+        let input = quote! {
+            #[derive(StructTable)]
+            struct FooSpec {
+                #[structable(serialize)]
+                foo: Value,
+            }
+        };
+        let input = syn::parse2(input).unwrap();
+        TableStructInputReceiver::from_derive_input(&input).unwrap();
+    }
+
+    #[test]
+    fn test_parse_all_opts() {
+        let input = quote! {
+            #[derive(StructTable)]
+            struct FooSpec {
+                #[structable(title="f", wide, pretty, serialize)]
+                foo: Value,
             }
         };
         let input = syn::parse2(input).unwrap();
