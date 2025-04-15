@@ -25,7 +25,10 @@
 //! # use structable_derive::StructTable;
 //! #
 //! # pub trait StructTable {
-//! #     fn headers<O: StructTableOptions>(config: &O) -> Vec<String>;
+//! #     fn class_headers<O: StructTableOptions>(config: &O) -> Option<Vec<String>>;
+//! #     fn instance_headers<O: StructTableOptions>(&self, config: &O) -> Option<Vec<String>> {
+//!         None
+//!       }
 //! #     fn data<O: StructTableOptions>(&self, config: &O) -> Vec<Option<String>>;
 //! #     fn status(&self) -> Option<String>;
 //! # }

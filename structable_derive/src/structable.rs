@@ -85,67 +85,69 @@ impl ToTokens for TableStructInputReceiver {
         let mut status_field: Option<&TableStructFieldReceiver> = None;
         let mut status_alt_field: Option<&TableStructFieldReceiver> = None;
 
-        for field in fields.iter() {
-            let field_ident = field.ident.as_ref().unwrap();
-            let field_title = field.title.clone().unwrap_or(field_ident.to_string());
-            let field_wide = field.wide;
+        for field in fields.iter().filter(|f| f.ident.is_some()) {
+            if let Some(field_ident) = field.ident.as_ref() {
+                //let field_ident = field.ident.as_ref().;
+                let field_title = field.title.clone().unwrap_or(field_ident.to_string());
+                let field_wide = field.wide;
 
-            // Determine how to get the data based in `optional` and `pretty` for list row column
-            let field_vec_value = match field.optional {
-                false => match field.serialize || field.pretty {
-                    false => quote!(
-                        Some(self. #field_ident .to_string())
-                    ),
-                    true => quote!(
-                        Some(
-                        if options.pretty_mode() {
-                            serde_json::to_string_pretty(&self. #field_ident)
-                        } else {
-                            serde_json::to_string(&self. #field_ident)
-                        }.unwrap_or_else(|_| String::from("<ERROR SERIALIZING DATA>"))
-                        )
-                    ),
-                },
-                true => match field.serialize || field.pretty {
-                    false => quote!(
-                        self. #field_ident .clone().map(|x| x.to_string())
-                    ),
-                    true => quote!(
-                        self. #field_ident
-                            .clone()
-                            .map(
-                                |v| if options.pretty_mode() {
-                                    serde_json::to_string_pretty(&v)
-                                } else {
-                                    serde_json::to_string(&v)
-                                }.unwrap_or_else(|_| String::from("<ERROR SERIALIZING DATA>"))
+                // Determine how to get the data based in `optional` and `pretty` for list row column
+                let field_vec_value = match field.optional {
+                    false => match field.serialize || field.pretty {
+                        false => quote!(
+                            Some(self. #field_ident .to_string())
+                        ),
+                        true => quote!(
+                            Some(
+                            if options.pretty_mode() {
+                                serde_json::to_string_pretty(&self. #field_ident)
+                            } else {
+                                serde_json::to_string(&self. #field_ident)
+                            }.unwrap_or_else(|_| String::from("<ERROR SERIALIZING DATA>"))
                             )
-                    ),
-                },
-            };
+                        ),
+                    },
+                    true => match field.serialize || field.pretty {
+                        false => quote!(
+                            self. #field_ident .clone().map(|x| x.to_string())
+                        ),
+                        true => quote!(
+                            self. #field_ident
+                                .clone()
+                                .map(
+                                    |v| if options.pretty_mode() {
+                                        serde_json::to_string_pretty(&v)
+                                    } else {
+                                        serde_json::to_string(&v)
+                                    }.unwrap_or_else(|_| String::from("<ERROR SERIALIZING DATA>"))
+                                )
+                        ),
+                    },
+                };
 
-            // Build field values processing for Vec<T> impl
-            let vec_struct_row = quote!(
-                if options.should_return_field(#field_title, #field_wide) {
-                    row.push(#field_vec_value);
+                // Build field values processing for Vec<T> impl
+                let vec_struct_row = quote!(
+                    if options.should_return_field(#field_title, #field_wide) {
+                        row.push(#field_vec_value);
+                    }
+                );
+                // Build field headers processing for the Vec<T> impl
+                let vec_struct_header_row = quote!(
+                    if options.should_return_field(#field_title, #field_wide) {
+                       headers.push(#field_title .to_string());
+                    }
+                );
+
+                vec_struct_fields.push(vec_struct_row);
+                vec_struct_headers.push(vec_struct_header_row);
+
+                // Save the status or status_alt (the one with name `status`) field
+                if field.status {
+                    status_field = Some(field);
                 }
-            );
-            // Build field headers processing for the Vec<T> impl
-            let vec_struct_header_row = quote!(
-                if options.should_return_field(#field_title, #field_wide) {
-                   headers.push(#field_title .to_string());
+                if field_title.to_lowercase() == "status" {
+                    status_alt_field = Some(field);
                 }
-            );
-
-            vec_struct_fields.push(vec_struct_row);
-            vec_struct_headers.push(vec_struct_header_row);
-
-            // Save the status or status_alt (the one with name `status`) field
-            if field.status {
-                status_field = Some(field);
-            }
-            if field_title.to_lowercase() == "status" {
-                status_alt_field = Some(field);
             }
         }
 
@@ -179,13 +181,13 @@ impl ToTokens for TableStructInputReceiver {
 
         tokens.extend(quote! {
             impl #imp StructTable for #ident #ty #wher {
-                fn headers<O: StructTableOptions>(options: &O) -> ::std::vec::Vec<::std::string::String> {
+                fn class_headers<O: StructTableOptions>(options: &O) -> std::option::Option<::std::vec::Vec<::std::string::String>> {
                     let mut headers: Vec<String> = Vec::new();
                     #(#vec_struct_headers)*
-                    headers
+                    Some(headers)
                 }
 
-                fn data<O: StructTableOptions>(&self, options: &O) -> ::std::vec::Vec<Option<::std::string::String>> {
+                fn data<O: StructTableOptions>(&self, options: &O) -> ::std::vec::Vec<::std::option::Option<::std::string::String>> {
                     let mut row: Vec<Option<String>> = Vec::new();
                     #(#vec_struct_fields)*
                     row
@@ -196,14 +198,15 @@ impl ToTokens for TableStructInputReceiver {
                 }
 
             }
+
             impl #imp StructTable for &#ident #ty #wher {
-                fn headers<O: StructTableOptions>(options: &O) -> ::std::vec::Vec<::std::string::String> {
+                fn class_headers<O: StructTableOptions>(options: &O) -> ::std::option::Option<::std::vec::Vec<::std::string::String>> {
                     let mut headers: Vec<String> = Vec::new();
                     #(#vec_struct_headers)*
-                    headers
+                    Some(headers)
                 }
 
-                fn data<O: StructTableOptions>(&self, options: &O) -> ::std::vec::Vec<Option<::std::string::String>> {
+                fn data<O: StructTableOptions>(&self, options: &O) -> ::std::vec::Vec<::std::option::Option<::std::string::String>> {
                     let mut row: Vec<Option<String>> = Vec::new();
                     #(#vec_struct_fields)*
                     row
