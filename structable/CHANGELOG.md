@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.3.0](https://github.com/gtema/structable/compare/structable-v0.2.1...structable-v0.3.0) - 2025-04-16
+
+### Added
+
+- Add possibility to implement trait for collections ([#17](https://github.com/gtema/structable/pull/17))
+
+### Other
+
+- Update metadata and doc ([#15](https://github.com/gtema/structable/pull/15))
+
 ## [0.2.1](https://github.com/gtema/structable/compare/structable-v0.2.0...structable-v0.2.1) - 2025-04-13
 
 ### Added
