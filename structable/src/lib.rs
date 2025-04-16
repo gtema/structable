@@ -55,9 +55,9 @@
 //! #     dummy: Option<String>,
 //! # }
 //! impl StructTable for User {
-//!     fn headers<O: StructTableOptions>(
+//!     fn class_headers<O: StructTableOptions>(
 //!         options: &O,
-//!     ) -> ::std::vec::Vec<::std::string::String> {
+//!     ) -> Option<Vec<String>> {
 //!         let mut headers: Vec<String> = Vec::new();
 //!         if options.should_return_field("ID", false) {
 //!             headers.push("ID".to_string());
@@ -77,7 +77,7 @@
 //!         if options.should_return_field("dummy", false) {
 //!             headers.push("dummy".to_string());
 //!         }
-//!         headers
+//!         Some(headers)
 //!     }
 //!
 //!     fn data<O: StructTableOptions>(
@@ -131,7 +131,7 @@
 //!  - `wide` return field only in the `wide` mode, or when explicitly requested through `fields`
 //!
 //!  - `serialize` serialize field value to the json. When `pretty` mode is requested uses
-//!  `to_pretty_string()`
+//!    `to_pretty_string()`
 //!
 //!
 //! ## Example
@@ -260,14 +260,25 @@ impl StructTableOptions for OutputConfig {
 
 /// Trait for building tables out of structures
 pub trait StructTable {
-    /// Return Vector of table headers (attribute titles to be returned)
-    fn headers<O: StructTableOptions>(config: &O) -> Vec<String>;
+    /// Return Vector of table headers (attribute titles to be returned) that are not instance
+    /// specific (i.e. struct)
+    fn class_headers<O: StructTableOptions>(_config: &O) -> Option<Vec<String>> {
+        None
+    }
+
+    /// Return Vector of table headers (attribute titles to be returned) from the instance that are
+    /// instance specific (i.e. HashMap)
+    fn instance_headers<O: StructTableOptions>(&self, _config: &O) -> Option<Vec<String>> {
+        None
+    }
 
     /// Return vector of selected fields as `Option<String>`
     fn data<O: StructTableOptions>(&self, config: &O) -> Vec<Option<String>>;
 
     /// Return structure status property
-    fn status(&self) -> Option<String>;
+    fn status(&self) -> Option<String> {
+        None
+    }
 }
 
 /// Build a table for a single structure
@@ -282,9 +293,12 @@ where
 {
     let headers = Vec::from(["Attribute".into(), "Value".into()]);
     let mut rows: Vec<Vec<String>> = Vec::new();
-    for (a, v) in T::headers(options).iter().zip(data.data(options).iter()) {
-        if let Some(data) = v {
-            rows.push(Vec::from([a.to_string(), data.to_string()]));
+    let col_headers = T::class_headers(options).or_else(|| data.instance_headers(options));
+    if let Some(hdr) = col_headers {
+        for (a, v) in hdr.iter().zip(data.data(options).iter()) {
+            if let Some(data) = v {
+                rows.push(Vec::from([a.to_string(), data.to_string()]));
+            }
         }
     }
     (headers, rows)
@@ -300,19 +314,24 @@ where
     T: StructTable,
     O: StructTableOptions,
 {
-    let headers = T::headers(options);
-    let rows: Vec<Vec<String>> = Vec::from_iter(data.map(|item| {
-        item.data(options)
-            .into_iter()
-            .map(|el| el.unwrap_or_else(|| String::from(" ")))
-            .collect::<Vec<String>>()
-    }));
-    (headers, rows)
+    if let Some(headers) = T::class_headers(options) {
+        let rows: Vec<Vec<String>> = Vec::from_iter(data.map(|item| {
+            item.data(options)
+                .into_iter()
+                .map(|el| el.unwrap_or_else(|| String::from(" ")))
+                .collect::<Vec<String>>()
+        }));
+        (headers, rows)
+    } else {
+        // TODO: Make method returning result
+        (Vec::new(), Vec::new())
+    }
 }
 
 #[cfg(test)]
 mod tests {
     use serde_json::{json, Value};
+    use std::collections::BTreeMap;
 
     use super::*;
 
@@ -751,5 +770,37 @@ mod tests {
         assert!(config.should_return_field("bar", false));
         assert!(config.should_return_field("baz", false));
         assert!(config.should_return_field("a:b-c", false));
+    }
+
+    #[test]
+    fn test_instance_headers() {
+        struct Sot(BTreeMap<String, String>);
+
+        impl StructTable for Sot {
+            fn instance_headers<O: StructTableOptions>(&self, _config: &O) -> Option<Vec<String>> {
+                Some(self.0.keys().map(Into::into).collect())
+            }
+            fn data<O: StructTableOptions>(&self, _config: &O) -> Vec<Option<String>> {
+                Vec::from_iter(self.0.values().map(|x| Some(x.to_string())))
+            }
+        }
+
+        let sot = Sot(BTreeMap::from([
+            ("a".into(), "1".into()),
+            ("b".into(), "2".into()),
+            ("c".into(), "3".into()),
+        ]));
+
+        assert_eq!(
+            build_table(&sot, &OutputConfig::default()),
+            (
+                vec!["Attribute".into(), "Value".into()],
+                vec![
+                    vec!["a".into(), "1".into()],
+                    vec!["b".into(), "2".into()],
+                    vec!["c".into(), "3".into()]
+                ]
+            )
+        );
     }
 }
