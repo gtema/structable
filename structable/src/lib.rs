@@ -524,10 +524,12 @@ mod tests {
             Some("foo".into())
         );
     }
+
     #[test]
     fn test_single_no_status() {
         assert_eq!(User::default().status(), None);
     }
+
     #[test]
     fn test_single_option_status() {
         assert_eq!(
@@ -556,7 +558,25 @@ mod tests {
             .status(),
             Some("Dummy".into())
         );
+
+        let (_, rows) = build_table(
+            &SerializeOptionStatusStruct {
+                status: Some(Status::Dummy),
+            },
+            &OutputConfig::default(),
+        );
+        assert_eq!(vec![vec!["status".to_string(), "Dummy".to_string()]], rows);
+
+        let (_, rows) = build_list_table(
+            [SerializeOptionStatusStruct {
+                status: Some(Status::Dummy),
+            }]
+            .iter(),
+            &OutputConfig::default(),
+        );
+        assert_eq!(vec![vec!["Dummy".to_string()]], rows);
     }
+
     #[test]
     fn test_status() {
         #[derive(Deserialize, Serialize, StructTable)]

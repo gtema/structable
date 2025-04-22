@@ -103,7 +103,9 @@ impl ToTokens for TableStructInputReceiver {
                                 serde_json::to_string_pretty(&self. #field_ident)
                             } else {
                                 serde_json::to_string(&self. #field_ident)
-                            }.unwrap_or_else(|_| String::from("<ERROR SERIALIZING DATA>"))
+                            }
+                                .map(|x| x.trim_matches('"').to_string())
+                                .unwrap_or_else(|_| String::from("<ERROR SERIALIZING DATA>"))
                             )
                         ),
                     },
@@ -119,7 +121,9 @@ impl ToTokens for TableStructInputReceiver {
                                         serde_json::to_string_pretty(&v)
                                     } else {
                                         serde_json::to_string(&v)
-                                    }.unwrap_or_else(|_| String::from("<ERROR SERIALIZING DATA>"))
+                                    }
+                                        .map(|x| x.trim_matches('"').to_string())
+                                        .unwrap_or_else(|_| String::from("<ERROR SERIALIZING DATA>"))
                                 )
                         ),
                     },
