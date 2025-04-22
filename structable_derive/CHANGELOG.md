@@ -6,6 +6,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.3.1](https://github.com/gtema/structable/compare/structable_derive-v0.3.0...structable_derive-v0.3.1) - 2025-04-22
+
+### Fixed
+
+- Trip quotes for serialized field in values ([#21](https://github.com/gtema/structable/pull/21))
+
 ## [0.3.0](https://github.com/gtema/structable/compare/structable_derive-v0.2.1...structable_derive-v0.3.0) - 2025-04-16
 
 ### Added
