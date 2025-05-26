@@ -230,6 +230,12 @@ pub trait StructTableOptions {
 
     /// Whether the attribute should be returned
     fn should_return_field<S: AsRef<str>>(&self, field: S, is_wide_field: bool) -> bool;
+
+    /// Return json pointer for the attribute to extract the data during table build
+    /// [RFC](https://datatracker.ietf.org/doc/html/rfc6901)
+    fn field_data_json_pointer<S: AsRef<str>>(&self, _field: S) -> Option<String> {
+        None
+    }
 }
 
 impl StructTableOptions for OutputConfig {
@@ -821,6 +827,57 @@ mod tests {
                     vec!["c".into(), "3".into()]
                 ]
             )
+        );
+    }
+
+    #[test]
+    fn test_json_pointer() {
+        struct CustomConfig {
+            jp: Option<String>,
+        }
+
+        impl StructTableOptions for CustomConfig {
+            fn wide_mode(&self) -> bool {
+                true
+            }
+
+            fn pretty_mode(&self) -> bool {
+                true
+            }
+
+            fn should_return_field<S: AsRef<str>>(&self, _field: S, _is_wide_field: bool) -> bool {
+                true
+            }
+
+            fn field_data_json_pointer<S: AsRef<str>>(&self, _field: S) -> Option<String> {
+                self.jp.clone()
+            }
+        }
+
+        #[derive(StructTable)]
+        struct Data {
+            #[structable(serialize)]
+            a: Value,
+            #[structable(optional, serialize)]
+            b: Option<Value>,
+        }
+
+        let config = CustomConfig {
+            jp: Some("/b/c".to_string()),
+        };
+        let sot = Data {
+            a: json!({"b": {"c": "d", "e": "f"}}),
+            b: Some(json!({"b": {"c": "x", "e": "f"}})),
+        };
+        assert_eq!(
+            build_table(&sot, &config),
+            (
+                vec!["Attribute".to_string(), "Value".to_string()],
+                vec![
+                    vec!["a".to_string(), "d".to_string()],
+                    vec!["b".to_string(), "x".to_string()],
+                ]
+            ),
         );
     }
 }

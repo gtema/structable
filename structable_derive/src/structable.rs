@@ -99,11 +99,22 @@ impl ToTokens for TableStructInputReceiver {
                         ),
                         true => quote!(
                             Some(
-                            if options.pretty_mode() {
-                                serde_json::to_string_pretty(&self. #field_ident)
-                            } else {
-                                serde_json::to_string(&self. #field_ident)
-                            }
+                                serde_json::to_value(self. #field_ident.clone())
+                                    .map(|v| {
+                                        options
+                                            .field_data_json_pointer(#field_title)
+                                            .map_or(
+                                                v.to_owned(),
+                                                |jp| {v.pointer(jp.as_ref()).unwrap_or(&Value::Null).to_owned()}
+                                            )
+                                    })
+                                    .and_then(|v| {
+                                        if options.pretty_mode() {
+                                            serde_json::to_string_pretty(&v)
+                                        } else {
+                                            serde_json::to_string(&v)
+                                        }
+                                    })
                                 .map(|x| x.trim_matches('"').to_string())
                                 .unwrap_or_else(|_| String::from("<ERROR SERIALIZING DATA>"))
                             )
@@ -116,15 +127,27 @@ impl ToTokens for TableStructInputReceiver {
                         true => quote!(
                             self. #field_ident
                                 .clone()
-                                .map(
-                                    |v| if options.pretty_mode() {
-                                        serde_json::to_string_pretty(&v)
-                                    } else {
-                                        serde_json::to_string(&v)
-                                    }
-                                        .map(|x| x.trim_matches('"').to_string())
-                                        .unwrap_or_else(|_| String::from("<ERROR SERIALIZING DATA>"))
-                                )
+                                .map(|x| {
+                                    serde_json::to_value(x)
+                                        .map(|v| {
+                                            options
+                                                .field_data_json_pointer(#field_title)
+                                                .map_or(
+                                                    v.to_owned(),
+                                                    |jp| {v.pointer(jp.as_ref()).unwrap_or(&Value::Null).to_owned()}
+                                                )
+                                        })
+                                        .and_then(|v| {
+                                            if options.pretty_mode() {
+                                                serde_json::to_string_pretty(&v)
+                                            } else {
+                                                serde_json::to_string(&v)
+                                            }
+                                        })
+                                    .map(|x| x.trim_matches('"').to_string())
+                                    .unwrap_or_else(|_| String::from("<ERROR SERIALIZING DATA>"))
+
+                                })
                         ),
                     },
                 };
