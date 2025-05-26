@@ -26,9 +26,7 @@
 //! #
 //! # pub trait StructTable {
 //! #     fn class_headers<O: StructTableOptions>(config: &O) -> Option<Vec<String>>;
-//! #     fn instance_headers<O: StructTableOptions>(&self, config: &O) -> Option<Vec<String>> {
-//!         None
-//!       }
+//! #     fn instance_headers<O: StructTableOptions>(&self, config: &O) -> Option<Vec<String>> { None }
 //! #     fn data<O: StructTableOptions>(&self, config: &O) -> Vec<Option<String>>;
 //! #     fn status(&self) -> Option<String>;
 //! # }
@@ -44,6 +42,7 @@
 //! #     fn wide_mode(&self) -> bool;
 //! #     fn pretty_mode(&self) -> bool;
 //! #     fn should_return_field<S: AsRef<str>>(&self, field: S, is_wide_field: bool) -> bool;
+//! #     fn field_data_json_pointer<S: AsRef<str>>(&self, _field: S) -> Option<String> {None}
 //! # }
 //! #
 //! # impl StructTableOptions for OutputConfig {
