@@ -6,6 +6,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.3.2](https://github.com/gtema/structable/compare/structable_derive-v0.3.1...structable_derive-v0.3.2) - 2025-05-26
+
+### Added
+
+- Add json path support ([#39](https://github.com/gtema/structable/pull/39))
+
 ## [0.3.1](https://github.com/gtema/structable/compare/structable_derive-v0.3.0...structable_derive-v0.3.1) - 2025-04-22
 
 ### Fixed
