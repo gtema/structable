@@ -105,7 +105,7 @@ impl ToTokens for TableStructInputReceiver {
                                             .field_data_json_pointer(#field_title)
                                             .map_or(
                                                 v.to_owned(),
-                                                |jp| {v.pointer(jp.as_ref()).unwrap_or(&Value::Null).to_owned()}
+                                                |jp| {v.pointer(jp.as_ref()).unwrap_or(&serde_json::Value::Null).to_owned()}
                                             )
                                     })
                                     .and_then(|v| {
@@ -134,7 +134,7 @@ impl ToTokens for TableStructInputReceiver {
                                                 .field_data_json_pointer(#field_title)
                                                 .map_or(
                                                     v.to_owned(),
-                                                    |jp| {v.pointer(jp.as_ref()).unwrap_or(&Value::Null).to_owned()}
+                                                    |jp| {v.pointer(jp.as_ref()).unwrap_or(&serde_json::Value::Null).to_owned()}
                                                 )
                                         })
                                         .and_then(|v| {
