@@ -860,6 +860,17 @@ mod tests {
             a: Value,
             #[structable(optional, serialize)]
             b: Option<Value>,
+            #[structable(serialize)]
+            c: NestedData,
+        }
+
+        #[derive(Clone, Deserialize, Serialize)]
+        struct NestedData {
+            b: NestedData2,
+        }
+        #[derive(Clone, Deserialize, Serialize)]
+        struct NestedData2 {
+            c: String,
         }
 
         let config = CustomConfig {
@@ -868,6 +879,9 @@ mod tests {
         let sot = Data {
             a: json!({"b": {"c": "d", "e": "f"}}),
             b: Some(json!({"b": {"c": "x", "e": "f"}})),
+            c: NestedData {
+                b: NestedData2 { c: "x".to_string() },
+            },
         };
         assert_eq!(
             build_table(&sot, &config),
@@ -876,6 +890,7 @@ mod tests {
                 vec![
                     vec!["a".to_string(), "d".to_string()],
                     vec!["b".to_string(), "x".to_string()],
+                    vec!["c".to_string(), "x".to_string()],
                 ]
             ),
         );
