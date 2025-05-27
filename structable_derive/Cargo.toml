@@ -1,6 +1,6 @@
 [package]
 name = "structable_derive"
-version = "0.3.2"
+version = "0.3.3"
 authors = ["Artem Goncharov (gtema)"]
 description = "Derive macros for the StructTable trait (structable crate)"
 categories.workspace = true

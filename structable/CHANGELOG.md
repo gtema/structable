@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.3.3](https://github.com/gtema/structable/compare/structable-v0.3.2...structable-v0.3.3) - 2025-05-27
+
+### Fixed
+
+- Prevent necessity to import serde_json::Value ([#41](https://github.com/gtema/structable/pull/41))
+
 ## [0.3.2](https://github.com/gtema/structable/compare/structable-v0.3.1...structable-v0.3.2) - 2025-05-26
 
 ### Added
