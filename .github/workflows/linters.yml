@@ -16,7 +16,7 @@ concurrency:
 
 env:
   CARGO_TERM_COLOR: always
-  rust_ver: 1.76
+  rust_ver: 1.78
 
 jobs:
   rustfmt:
