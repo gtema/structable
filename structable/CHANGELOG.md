@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.3.4](https://github.com/gtema/structable/compare/structable-v0.3.3...structable-v0.3.4) - 2025-08-08
+
+### Other
+
+- *(deps)* Bump darling from 0.20.11 to 0.21.0 ([#56](https://github.com/gtema/structable/pull/56))
+
 ## [0.3.3](https://github.com/gtema/structable/compare/structable-v0.3.2...structable-v0.3.3) - 2025-05-27
 
 ### Fixed
