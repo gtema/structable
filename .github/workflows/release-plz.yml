@@ -16,7 +16,7 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       pull-requests: write
-      id-content: write
+      id-token: write
 
     steps:
       - name: Harden Runner
