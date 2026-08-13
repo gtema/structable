@@ -92,6 +92,22 @@ impl ToTokens for TableStructInputReceiver {
                 let field_wide = field.wide;
 
                 // Determine how to get the data based in `optional` and `pretty` for list row column
+                let json_pointer_block = quote!(
+                    options
+                        .field_data_json_pointer(#field_title)
+                        .as_deref()
+                        .and_then(|jp| v.pointer(jp).and_then(|r| if r.is_null() { None } else { Some(r) }))
+                        .map(|r| r.to_owned())
+                        .or_else(|| {
+                            options
+                                .field_data_json_pointer_fallback(#field_title)
+                                .as_deref()
+                                .and_then(|jp| v.pointer(jp).and_then(|r| if r.is_null() { None } else { Some(r) }))
+                                .map(|r| r.to_owned())
+                        })
+                        .unwrap_or_else(|| v.to_owned())
+                );
+
                 let field_vec_value = match field.optional {
                     false => match field.serialize || field.pretty {
                         false => quote!(
@@ -101,12 +117,7 @@ impl ToTokens for TableStructInputReceiver {
                             Some(
                                 serde_json::to_value(self. #field_ident.clone())
                                     .map(|v| {
-                                        options
-                                            .field_data_json_pointer(#field_title)
-                                            .map_or(
-                                                v.to_owned(),
-                                                |jp| {v.pointer(jp.as_ref()).unwrap_or(&serde_json::Value::Null).to_owned()}
-                                            )
+                                        #json_pointer_block
                                     })
                                     .and_then(|v| {
                                         if options.pretty_mode() {
@@ -115,8 +126,8 @@ impl ToTokens for TableStructInputReceiver {
                                             serde_json::to_string(&v)
                                         }
                                     })
-                                .map(|x| x.trim_matches('"').to_string())
-                                .unwrap_or_else(|_| String::from("<ERROR SERIALIZING DATA>"))
+                                    .map(|x| x.trim_matches('"').to_string())
+                                    .unwrap_or_else(|_| String::from("<ERROR SERIALIZING DATA>"))
                             )
                         ),
                     },
@@ -130,12 +141,7 @@ impl ToTokens for TableStructInputReceiver {
                                 .map(|x| {
                                     serde_json::to_value(x)
                                         .map(|v| {
-                                            options
-                                                .field_data_json_pointer(#field_title)
-                                                .map_or(
-                                                    v.to_owned(),
-                                                    |jp| {v.pointer(jp.as_ref()).unwrap_or(&serde_json::Value::Null).to_owned()}
-                                                )
+                                            #json_pointer_block
                                         })
                                         .and_then(|v| {
                                             if options.pretty_mode() {
@@ -144,10 +150,10 @@ impl ToTokens for TableStructInputReceiver {
                                                 serde_json::to_string(&v)
                                             }
                                         })
-                                    .map(|x| x.trim_matches('"').to_string())
-                                    .unwrap_or_else(|_| String::from("<ERROR SERIALIZING DATA>"))
+                                        .map(|x| x.trim_matches('"').to_string())
+                                        .unwrap_or_else(|_| String::from("<ERROR SERIALIZING DATA>"))
 
-                                })
+                                    })
                         ),
                     },
                 };
