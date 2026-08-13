@@ -236,6 +236,13 @@ pub trait StructTableOptions {
     fn field_data_json_pointer<S: AsRef<str>>(&self, _field: S) -> Option<String> {
         None
     }
+
+    /// Return fallback json pointer to use when the main jsonpointer does not
+    /// point to an existing field.
+    /// [RFC](https://datatracker.ietf.org/doc/html/rfc6901)
+    fn field_data_json_pointer_fallback<S: AsRef<str>>(&self, _field: S) -> Option<String> {
+        None
+    }
 }
 
 impl StructTableOptions for OutputConfig {
@@ -893,6 +900,74 @@ mod tests {
                     vec!["c".to_string(), "x".to_string()],
                 ]
             ),
+        );
+    }
+
+    #[test]
+    fn test_json_pointer_fallback() {
+        struct CustomConfig {
+            jp: Option<String>,
+            jp_fallback: Option<String>,
+        }
+
+        impl StructTableOptions for CustomConfig {
+            fn wide_mode(&self) -> bool {
+                true
+            }
+
+            fn pretty_mode(&self) -> bool {
+                true
+            }
+
+            fn should_return_field<S: AsRef<str>>(&self, _field: S, _is_wide_field: bool) -> bool {
+                true
+            }
+
+            fn field_data_json_pointer<S: AsRef<str>>(&self, _field: S) -> Option<String> {
+                self.jp.clone()
+            }
+
+            fn field_data_json_pointer_fallback<S: AsRef<str>>(&self, _field: S) -> Option<String> {
+                self.jp_fallback.clone()
+            }
+        }
+
+        #[derive(StructTable)]
+        struct FallbackData {
+            #[structable(serialize)]
+            a: Value,
+            #[structable(optional, serialize)]
+            b: Option<Value>,
+            #[structable(serialize)]
+            c: Value,
+        }
+
+        let data = FallbackData {
+            // /nonexistent is the primary pointer; /exists is the fallback that resolves
+            a: json!({"nonexistent": null, "exists": "from_fallback"}),
+            b: Some(json!({"nonexistent": null, "exists": "from_fallback_optional"})),
+            // /nonexistent is primary; /fallback is fallback, neither exists → original value
+            c: json!({"data": "original_value"}),
+        };
+
+        // Primary doesn't resolve, fallback does
+        let config = CustomConfig {
+            jp: Some("/nonexistent".to_string()),
+            jp_fallback: Some("/exists".to_string()),
+        };
+
+        let (_, rows) = build_table(&data, &config);
+        assert_eq!(
+            rows,
+            vec![
+                vec!["a".to_string(), "from_fallback".to_string()],
+                vec!["b".to_string(), "from_fallback_optional".to_string()],
+                // Neither primary nor fallback resolves → full serialized original value (pretty-printed)
+                vec![
+                    "c".to_string(),
+                    "{\n  \"data\": \"original_value\"\n}".to_string()
+                ],
+            ]
         );
     }
 }

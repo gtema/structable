@@ -43,6 +43,7 @@
 //! #     fn pretty_mode(&self) -> bool;
 //! #     fn should_return_field<S: AsRef<str>>(&self, field: S, is_wide_field: bool) -> bool;
 //! #     fn field_data_json_pointer<S: AsRef<str>>(&self, _field: S) -> Option<String> {None}
+//! #     fn field_data_json_pointer_fallback<S: AsRef<str>>(&self, _field: S) -> Option<String> {None}
 //! # }
 //! #
 //! # impl StructTableOptions for OutputConfig {
