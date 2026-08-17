@@ -6,6 +6,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.3.5](https://github.com/gtema/structable/compare/structable_derive-v0.3.4...structable_derive-v0.3.5) - 2026-08-17
+
+### Added
+
+- Add fallback json pointer support ([#172](https://github.com/gtema/structable/pull/172))
+
+### Other
+
+- Bump syn and darling versions ([#171](https://github.com/gtema/structable/pull/171))
+- *(deps)* Bump darling from 0.21.0 to 0.23.0 ([#103](https://github.com/gtema/structable/pull/103))
+
 ## [0.3.4](https://github.com/gtema/structable/compare/structable_derive-v0.3.3...structable_derive-v0.3.4) - 2025-08-08
 
 ### Other
