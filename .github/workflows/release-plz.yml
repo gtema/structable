@@ -40,7 +40,7 @@ jobs:
           token: ${{ steps.generate-token.outputs.token }}
 
       - name: Install Rust toolchain
-        uses: dtolnay/rust-toolchain@efa25f7f19611383d5b0ccf2d1c8914531636bf9 # stable
+        uses: dtolnay/rust-toolchain@7e38f4b43b4db5c8dd498af069a4f6196df1d067 # stable
         with:
           toolchain: stable
 
